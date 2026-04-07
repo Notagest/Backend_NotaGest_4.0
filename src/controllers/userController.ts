@@ -4,6 +4,7 @@ import * as userService from '../services/userService.js';
 import User from '../models/userModel.js';
 import { IAuthRequest } from '../interfaces/IAuthRequest.js';
 import { IUserBody, IChangePasswordBody } from '../interfaces/IUserRequest.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * @openapi
@@ -16,8 +17,6 @@ import { IUserBody, IChangePasswordBody } from '../interfaces/IUserRequest.js';
 export const getUserProfile = async (req: IAuthRequest, res: Response) => {
   const profileId = req.params.id;
   const authenticatedUserId = req.user?.id;
-
-  // verificação se o ID existe e se o usuário está autenticado
   if (!profileId || !authenticatedUserId) {
     return res.status(400).json({ 
       message: 'ID do perfil ou usuário autenticado não encontrado.' 
@@ -30,12 +29,24 @@ export const getUserProfile = async (req: IAuthRequest, res: Response) => {
 
   try {
     const user = await userService.getProfileById(profileId);
-    if (!user) return res.status(404).json({ message: 'Perfil não encontrado.' });
+    if (!user) {
+        logger.info('Perfil não encontrado', { route: req.originalUrl, userId: authenticatedUserId });
+        return res.status(404).json({ message: 'Perfil não encontrado.' });
+    }
+
+    logger.info('Perfil encontrado', { route: req.originalUrl, userId: authenticatedUserId });
     res.status(200).json(user);
-  } catch (error: any) {
-    console.error('Erro ao buscar perfil:', error.message);
+} catch (error: any) {
+    logger.error('Erro ao buscar perfil', {
+        message: error.message,
+        stack: error.stack,
+        route: req.originalUrl,
+        method: req.method,
+        userId: authenticatedUserId,
+        body: req.body
+    });
     res.status(500).json({ message: 'Erro interno ao buscar perfil.' });
-  }
+}
 };
 
 // --- B. UPDATE ---
@@ -65,6 +76,7 @@ export const updateUserProfile = async (req: IAuthRequest, res: Response) => {
       message: 'Perfil atualizado com sucesso!',
       data: updatedUser
     });
+    logger.info('Perfil atualizado com sucesso', { route: req.originalUrl, userId: profileId, updatedFields: Object.keys(req.body) });
   } catch (error: any) {
     console.error('Erro ao atualizar perfil:', error.message);
     res.status(500).json({ message: 'Erro ao atualizar o perfil.' });
@@ -96,6 +108,7 @@ export const changePassword = async (req: IAuthRequest, res: Response) => {
 
     user.senha = hashedPassword;
     await user.save();
+    logger.info('Senha alterada com sucesso', { userEmail });
 
     res.status(200).json({ message: 'Senha alterada com sucesso.' });
   } catch (err) {
