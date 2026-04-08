@@ -13,28 +13,26 @@ export const sendLog = async (
   data: LogData = {}
 ): Promise<void> => {
   try {
-    
-    const payload = {
-      message,
-      level,
-      timestamp: new Date().toISOString(),
-      ...defaultLogData,
-      ...data
-    };
 
-    
-    if (payload.body && payload.body.password) {
-      payload.body.password = "***";
-    }
+    const log = [
+      {
+        dt: new Date().toISOString(),
+        message,
+        level,
+        ...defaultLogData,
+        ...data
+      }
+    ];
 
-    await axios.post(BETTERSTACK_CONFIG.url, payload, {
+    await axios.post("https://in.logs.betterstack.com", log, {
       headers: {
-        Authorization: `Bearer ${BETTERSTACK_CONFIG.token}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.BETTERSTACK_TOKEN}`
       }
     });
+
   } catch (error: any) {
-    console.error("Erro ao enviar log:", error.message);
+    console.error("Erro ao enviar log:", error.response?.data || error.message);
   }
 };
 

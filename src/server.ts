@@ -21,7 +21,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config();
-//connectDB();
+connectDB();
 
 const app = express();
 app.use(cors({
@@ -61,6 +61,8 @@ app.use((req: Request, res: Response) => {
   });
   res.status(404).json({ message: "Rota não encontrada" });
 });
+
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Backend rodando na porta ${PORT}`));

@@ -1,6 +1,7 @@
 import User from '../models/userModel.js';
 import { IUser } from '../interfaces/IUser.js';
 
+
 // CREATE
 // Tipamos os parâmetros como string e o retorno como uma Promise que entrega um IUser
 export const createProfile = async (email: string, nome: string, senha: string): Promise<IUser> => {
@@ -32,7 +33,7 @@ export const getProfileById = async (_id: string): Promise<IUser | null> => {
 // updateData usa 'Partial<IUser>' para indicar que pode receber qualquer campo da interface IUser
 export const updateProfileById = async (_id: string, updateData: Partial<IUser>): Promise<IUser | null> => {
   try {
-    delete updateData.email; // Evita alteração de email por segurança
+    delete updateData.email; 
     
     const updatedProfile = await User.findByIdAndUpdate(
       _id,
