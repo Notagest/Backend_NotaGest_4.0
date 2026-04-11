@@ -95,5 +95,8 @@ router.post('/internal', userController.createProfileInternal);
 router.get('/:id', protect, userController.getUserProfile);
 router.put('/:id', protect, userController.updateUserProfile);
 router.delete('/:id', protect, userController.deleteUser);
+router.get('/', (req, res) => {
+  res.json({ message: 'Tá rodando' });
+});
 
 export default router;
