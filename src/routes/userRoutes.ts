@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import * as userController from '../controllers/userController.js';
 import { protect } from '../middleware/auth.js';
 import User from '../models/userModel.js';
+import { logger } from '../utils/logger.js';
 
 const router = Router();
 
@@ -29,12 +30,20 @@ const router = Router();
  */
 router.get('/me', protect, async (req: Request, res: Response) => {
   try {
-    // req.user geralmente é injetado pelo middleware protect
+    logger.info('Buscando usuário logado', { route: req.originalUrl });
+
     const user = await User.findOne({ email: (req as any).user.email }).select('_id nome email');
-    if (!user) return res.status(404).json({ message: 'Usuário não encontrado' });
+
+    if (!user) {
+      logger.info('Usuário não encontrado', { route: req.originalUrl });
+      return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+
+    logger.info('Usuário retornado com sucesso', { route: req.originalUrl });
+
     res.json(user);
   } catch (error: any) {
-    console.error('Erro ao buscar usuário:', error.message);
+    logger.error('Erro ao buscar usuário:', error.message);
     res.status(500).json({ message: 'Erro ao buscar usuário' });
   }
 });
@@ -48,11 +57,33 @@ router.get('/me', protect, async (req: Request, res: Response) => {
  */
 router.get('/byEmail/:email', async (req: Request, res: Response) => {
   try {
+    logger.info('Buscando usuário por email', { 
+      route: req.originalUrl,
+      email: req.params.email
+    });
+
     const user = await User.findOne({ email: req.params.email });
-    if (!user) return res.status(404).json({ message: 'Usuário não encontrado.' });
+
+    if (!user) {
+      logger.info('Usuário não encontrado por email', { 
+        route: req.originalUrl,
+        email: req.params.email
+      });
+      return res.status(404).json({ message: 'Usuário não encontrado.' });
+    }
+
+    logger.info('Usuário encontrado por email', { 
+      route: req.originalUrl,
+      email: req.params.email
+    });
+
     res.json(user);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
+    logger.error('Erro ao buscar usuário por email', {
+      route: req.originalUrl,
+      method: req.method
+    });
+
     res.status(500).json({ message: 'Erro ao buscar usuário.' });
   }
 });
@@ -64,5 +95,8 @@ router.post('/internal', userController.createProfileInternal);
 router.get('/:id', protect, userController.getUserProfile);
 router.put('/:id', protect, userController.updateUserProfile);
 router.delete('/:id', protect, userController.deleteUser);
+router.get('/', (req, res) => {
+  res.json({ message: 'Tá rodando' });
+});
 
 export default router;

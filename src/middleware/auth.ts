@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { IAuthRequest } from '../interfaces/IAuthRequest.js';
 import dotenv from 'dotenv';
+import { logger } from '../utils/logger.js';
 
 dotenv.config();
 
@@ -15,12 +16,16 @@ export const protect = (req: IAuthRequest, res: Response, next: NextFunction) =>
             token = req.headers.authorization.split(' ')[1];
             
             if (!token || token === 'null') {
-                 console.error(' Token é nulo ou "null". Não autorizado.');
-                 return res.status(401).json({ message: 'Não autorizado, token nulo' });
+                logger.error('Token nulo ou inválido', {
+                    route: req.originalUrl,
+                    method: req.method
+                });
+
+                return res.status(401).json({ message: 'Não autorizado, token nulo' });
             }
 
             const secret = process.env.JWT_SECRET as string;
-            // Tipamos o decoded como um objeto que contém id e email
+
             const decoded = jwt.verify(token, secret) as { id: string; email: string };
     
             req.user = { 
@@ -30,14 +35,24 @@ export const protect = (req: IAuthRequest, res: Response, next: NextFunction) =>
    
             next();
         } catch (error: any) {
-            console.error('FALHA NA VERIFICAÇÃO DO TOKEN:', error.message);
+
+            logger.error('Falha na verificação do token', {
+                message: error.message,
+                route: req.originalUrl,
+                method: req.method
+            });
+
             return res.status(401).json({ message: `Token inválido: ${error.message}` });
         }
     } else {
-        console.error('Não autorizado, cabeçalho de autorização não fornecido.');
+
+        logger.error('Token não fornecido no header', {
+            route: req.originalUrl,
+            method: req.method
+        });
+
         return res.status(401).json({ message: 'Não autorizado, token não fornecido.' });
     }
 };
 
-// Se o seu server.ts ou routes importam como 'import protect from...', adicione isso:
 export default protect;
