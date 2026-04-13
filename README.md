@@ -78,7 +78,7 @@ PUT /api/users/:id
 
 <img width="745" height="476" alt="1 4 3" src="https://github.com/user-attachments/assets/322dabff-c02b-4217-8ec5-fa14068ab61d" />
 
-### ❌ 2. Testes de Erro (LOG INFO)
+### ❌ 2. Testes de Erro (LOG ERROR)
 
 #### 🔹 2.1 Token inválido
 - GET /api/users/me
