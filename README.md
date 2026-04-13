@@ -137,3 +137,9 @@ Qualquer requisição acima de 1 (segundo) já dispara alerta
 <img width="1162" height="385" alt="lentidao2" src="https://github.com/user-attachments/assets/a42592ba-5cf7-4143-b602-da70a83343a5" />
 
 <img width="680" height="636" alt="lentidao3" src="https://github.com/user-attachments/assets/ea2facbe-a8d0-4bd3-9f46-8b6729141cde" />
+
+### Integrantes do Projeto:
+- Ana Laura Martins
+- Bianca Benatti
+- José Paulo
+- Rodolfo Antunes
