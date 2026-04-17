@@ -32,7 +32,7 @@ docker build -t backendnotagest .
 ### 🔹 2. Rodar o container
 
 ```bash
-docker run -d -p 4000:4000 fontendnotaget
+docker run -d -p 4000:4000 backendnotagest
 ````
 ## 🔍 Observabilidade (Logs)
 
