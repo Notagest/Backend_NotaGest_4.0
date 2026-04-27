@@ -4,6 +4,7 @@ import uploadMiddleware from '../middleware/uploads.js';
 import { extractInvoiceData } from '../services/llmService.js';
 import { IAuthRequest } from '../interfaces/IAuthRequest.js';
 import path from 'path';
+import fs from 'fs';
 
 const router = express.Router();
 
@@ -38,6 +39,7 @@ router.post(
   protect,
   uploadMiddleware,
   async (req: IAuthRequest, res: Response) => {
+    fs.appendFileSync('debug.log', `--- Rota /api/ai/extract acionada em ${new Date().toISOString()} ---\n`);
     try {
       if (!req.file) {
         console.error('Tentativa de upload falhou: Nenhum arquivo recebido.');
@@ -58,7 +60,7 @@ router.post(
         filePath: relativePath
       });
     } catch (error: any) {
-      console.error(error);
+      fs.appendFileSync('debug.log', `Route Error: ${error.message}\nStack: ${error.stack}\n`);
       res.status(500).json({ message: error.message || 'Erro interno na extração.' });
     }
   }

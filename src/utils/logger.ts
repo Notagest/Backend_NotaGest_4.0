@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BETTERSTACK_CONFIG } from "../config/betterstack.js";
+
 import { LogLevel, LogData } from "../types/log.js";
 
 const defaultLogData = {

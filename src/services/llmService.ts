@@ -24,7 +24,7 @@ function fileToGenerativePart(filePath: string, mimeType: string) {
 
 export const extractInvoiceData = async (filePath: string, mimeType: string) => {
   const genAI = getGenAI();
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const prompt = `Analise o documento anexado, que pode ser uma nota fiscal formal, um cupom, um recibo ou até mesmo uma anotação escrita à mão.
 Sua tarefa é extrair o máximo de informação possível e retornar ESTRITAMENTE um objeto JSON.
@@ -51,14 +51,20 @@ Não inclua nenhum texto extra, apenas o JSON puro, começando em { e terminando
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
     const text = response.text();
+    fs.appendFileSync('debug.log', `Raw AI Response: ${text}\n`);
     
     // Tratativa caso o modelo teime em retornar o JSON dentro de bloco markdown:
     const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
     
-    const data = JSON.parse(cleanText);
-    return data;
+    try {
+      const data = JSON.parse(cleanText);
+      return data;
+    } catch (parseError: any) {
+      fs.appendFileSync('debug.log', `Parse Error: ${parseError.message}\nClean Text: ${cleanText}\n`);
+      throw new Error("A IA retornou um formato inválido. Tente novamente.");
+    }
   } catch (error: any) {
-    console.error("Erro na extração LLM:", error.message);
-    throw new Error('Falha ao extrair dados da imagem usando Inteligência Artificial.');
+    fs.appendFileSync('debug.log', `Detailed AI Error: ${JSON.stringify(error, null, 2)}\n`);
+    throw new Error(error.message || 'Falha ao extrair dados da imagem usando Inteligência Artificial.');
   }
 };
