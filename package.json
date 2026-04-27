@@ -1,6 +1,6 @@
 {
   "name": "notagestexpress",
-  "version": "1.0.0",
+  "version": "0.1.1",
   "description": "",
   "keywords": [],
   "license": "ISC",
@@ -14,6 +14,7 @@
     "dev": "nodemon --exec node --loader ts-node/esm --no-warnings ./src/server.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",

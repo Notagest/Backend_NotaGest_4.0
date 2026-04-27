@@ -12,6 +12,7 @@ import userRoutes from './routes/userRoutes.js';
 import fileRoutes from './routes/fileRoutes.js';
 import propertyRoutes from './routes/propertyRoutes.js';
 import uploadFileRoutes from './routes/uploadFileRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 
 // Configurando o dirname para ESModules
 const __filename = fileURLToPath(import.meta.url);
@@ -40,6 +41,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/uploads', fileRoutes);
 app.use('/api/imoveis', propertyRoutes);
 app.use('/api/uploadfile', uploadFileRoutes);
+app.use('/api/ai', aiRoutes);
 // Servir arquivos da pasta uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -49,4 +51,9 @@ app.use((req: Request, res: Response) =>{
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Backend rodando na porta ${PORT}`));
+
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => console.log(`Backend rodando na porta ${PORT}`));
+}
+
+export default app;

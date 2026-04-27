@@ -25,3 +25,9 @@ Thumbs.db
 # Arquivos temporários
 tmp/
 temp/
+
+# Arquivos de testes
+tests/
+__tests__/
+*.test.ts
+*.spec.ts
