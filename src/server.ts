@@ -12,7 +12,13 @@ import userRoutes from './routes/userRoutes.js';
 import fileRoutes from './routes/fileRoutes.js';
 import propertyRoutes from './routes/propertyRoutes.js';
 import uploadFileRoutes from './routes/uploadFileRoutes.js';
+<<<<<<< HEAD
 import aiRoutes from './routes/aiRoutes.js';
+=======
+import { requestLogger } from "./middleware/requestLogger.js";
+import { errorMiddleware } from "./middleware/errorMiddleware.js";
+import { logger } from './utils/logger.js';
+>>>>>>> 6c7ab5c1fc676cb97c71bac130e2031326b511e2
 
 // Configurando o dirname para ESModules
 const __filename = fileURLToPath(import.meta.url);
@@ -36,6 +42,9 @@ app.use(express.json());
 // Swagger
 setupSwagger(app);
 
+// Logs
+app.use(requestLogger);
+
 // Rotas
 app.use('/api/users', userRoutes);
 app.use('/api/uploads', fileRoutes);
@@ -45,15 +54,30 @@ app.use('/api/ai', aiRoutes);
 // Servir arquivos da pasta uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// erro global
+app.use(errorMiddleware);
+
 // 404
-app.use((req: Request, res: Response) =>{
-    res.status(404).json({message: "Rota não encontrada"});
+app.use((req: Request, res: Response) => {
+  logger.info("Rota não encontrada", {
+    url: req.originalUrl,
+    method: req.method,
+    ip: req.ip
+  });
+  res.status(404).json({ message: "Rota não encontrada" });
 });
 
+
+
 const PORT = process.env.PORT || 5000;
+<<<<<<< HEAD
 
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => console.log(`Backend rodando na porta ${PORT}`));
 }
 
 export default app;
+=======
+app.listen(PORT, () => console.log(`Backend rodando na porta ${PORT}`));
+
+>>>>>>> 6c7ab5c1fc676cb97c71bac130e2031326b511e2

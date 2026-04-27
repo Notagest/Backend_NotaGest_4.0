@@ -7,6 +7,7 @@ on:
 
 jobs:
   version:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
     steps:
@@ -23,6 +24,10 @@ jobs:
 
       - name: Rodar build
         run: npm run build
+
+      # 🐳 STEP OBRIGATÓRIO DO DOCKER
+      - name: Build Docker Image
+        run: docker build -t backendnotagest .
 
       - name: Testes unitarios
         run: npm test    
@@ -93,7 +98,14 @@ jobs:
 
       - name: Atualizar versão no package.json
         run: |
+         CURRENT_VERSION=$(node -p "require('./package.json').version")
+    
+          if [ "$CURRENT_VERSION" = "${{ env.new_version }}" ]; then
+            echo "Versão já está atual. Pulando atualização."
+          else
           npm version ${{ env.new_version }} --no-git-tag-version
+          fi  
+
           
       - name: Commit e push
         env:
