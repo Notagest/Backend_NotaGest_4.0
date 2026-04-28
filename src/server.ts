@@ -3,6 +3,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+
 import { fileURLToPath } from 'url';
 
 // importação dos arquivos internos
@@ -28,6 +29,7 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:3000',
+    'http://localhost:3001',
     'https://nota-gest.vercel.app'
   ],
   methods: ['GET','POST','PUT','DELETE'],

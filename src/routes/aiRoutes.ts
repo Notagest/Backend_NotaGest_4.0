@@ -2,9 +2,9 @@ import express, { Response } from 'express';
 import { protect } from '../middleware/auth.js';
 import uploadMiddleware from '../middleware/uploads.js';
 import { extractInvoiceData } from '../services/llmService.js';
+import { queryRAG } from '../controllers/aiController.js';
 import { IAuthRequest } from '../interfaces/IAuthRequest.js';
 import path from 'path';
-import fs from 'fs';
 
 const router = express.Router();
 
@@ -39,7 +39,6 @@ router.post(
   protect,
   uploadMiddleware,
   async (req: IAuthRequest, res: Response) => {
-    fs.appendFileSync('debug.log', `--- Rota /api/ai/extract acionada em ${new Date().toISOString()} ---\n`);
     try {
       if (!req.file) {
         console.error('Tentativa de upload falhou: Nenhum arquivo recebido.');
@@ -60,10 +59,31 @@ router.post(
         filePath: relativePath
       });
     } catch (error: any) {
-      fs.appendFileSync('debug.log', `Route Error: ${error.message}\nStack: ${error.stack}\n`);
+      console.error("Erro na rota de extração:", error.message || error);
       res.status(500).json({ message: error.message || 'Erro interno na extração.' });
     }
   }
 );
+
+/**
+ * @swagger
+ * /api/ai/query:
+ *   post:
+ *     summary: Faz uma pergunta inteligente sobre as notas fiscais do usuário (RAG).
+ *     tags: [Inteligência Artificial]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               query:
+ *                 type: string
+ *                 example: "Quanto eu gastei com iluminação na obra Casa Nova?"
+ */
+router.post('/query', protect, queryRAG);
 
 export default router;

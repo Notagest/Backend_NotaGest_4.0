@@ -13,6 +13,7 @@ export interface IFile extends Document {
   subcategory: string;
   observation?: string;             // Opcional
   filePath?: string;                // Opcional
+  embeddings?: number[];            // Vetor para RAG
   createdAt: Date;
   updatedAt: Date;
 }
