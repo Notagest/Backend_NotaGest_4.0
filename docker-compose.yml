@@ -1,0 +1,69 @@
+services:
+  # 🍃 Banco de Dados (MongoDB)
+  mongodb:
+    image: mongo:latest
+    container_name: notagest-db
+    ports:
+      - "27017:27017"
+    networks:
+      - notagest-network
+    volumes:
+      - mongo-data:/data/db
+
+  # 🔐 Microsserviço de Autenticação
+  microservice:
+    build:
+      context: ../Microsservico_NotaGest_4.0
+    container_name: notagest-microservice
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - MONGO_URI=mongodb://mongodb:27017/notagest
+      - JWT_SECRET=meu_super_segredo_123
+    depends_on:
+      - mongodb
+    networks:
+      - notagest-network
+
+  # ⚙️ Backend Principal
+  backend:
+    build:
+      context: .
+    container_name: notagest-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/notagest
+      - NEXT_PUBLIC_AUTH_SERVICE_URL=http://microservice:5001/api/users
+      - JWT_SECRET=meu_super_segredo_123
+      - GEMINI_API_KEY=AIzaSyDYG_Xh1HOoUfrxMUz2pKyiIpb5o05MQLw
+    depends_on:
+      - mongodb
+      - microservice
+    networks:
+      - notagest-network
+
+  # 💻 Frontend (Interface)
+  frontend:
+    build:
+      context: ../Frontend_NotaGest_4.0
+    container_name: notagest-frontend
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - NEXT_PUBLIC_AUTH_SERVICE_URL=http://localhost:5001/api/users
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
+    depends_on:
+      - backend
+    networks:
+      - notagest-network
+
+networks:
+  notagest-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
