@@ -25,12 +25,22 @@ jobs:
       - name: Rodar build
         run: npm run build
 
-      # 🐳 STEP OBRIGATÓRIO DO DOCKER
-      - name: Build Docker Image
-        run: docker build -t backendnotagest .
+      # 🐳 DOCKER LOGIN
+      - name: Login no Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Testes unitarios
         run: npm test    
+
+      # 🔍 SONAR CLOUD SCAN
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Checkout do código com token
         uses: actions/checkout@v2
@@ -118,6 +128,16 @@ jobs:
           git tag v${{ env.new_version }}
           git push origin main --tags
 
+      # 🐳 DOCKER BUILD & PUSH
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/notagest-backend:latest
+            ${{ secrets.DOCKER_USERNAME }}/notagest-backend:v${{ env.new_version }}
+
       - name: Enviar e-mail de falha
         uses: dawidd6/action-send-mail@v3
         if: failure()
@@ -129,4 +149,4 @@ jobs:
           password: ${{ secrets.SENHA_EMAIL }}
           subject: Falha no Pipeline - ${{ github.repository }}
           to: ${{ secrets.EMAIL_DESTINO }}
-          from: ${{ secrets.EMAIL_ORIGEM }}
+          from: ${{ secrets.EMAIL_ORIGEM }}
