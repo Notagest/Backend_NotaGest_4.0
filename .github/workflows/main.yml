@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-       prePI 
+      - prePI
 
 jobs:
   version:
@@ -124,8 +124,21 @@ jobs:
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
           git add package.json
-          git commit -m "chore(release): version ${{ env.new_version }}"
-          git tag v${{ env.new_version }}
+          
+          # Só faz commit se houver mudanças no package.json
+          if git diff --cached --quiet; then
+            echo "Sem mudanças para commitar."
+          else
+            git commit -m "chore(release): version ${{ env.new_version }}"
+          fi
+
+          # Só cria a tag se ela não existir
+          if git rev-parse v${{ env.new_version }} >/dev/null 2>&1; then
+            echo "Tag v${{ env.new_version }} já existe."
+          else
+            git tag v${{ env.new_version }}
+          fi
+          
           git push origin prePI --tags
 
       # 🐳 DOCKER BUILD & PUSH
