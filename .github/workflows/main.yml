@@ -163,3 +163,8 @@ jobs:
           subject: Falha no Pipeline - ${{ github.repository }}
           to: ${{ secrets.EMAIL_DESTINO }}
           from: ${{ secrets.EMAIL_ORIGEM }}
+
+      # 💓 BETTER STACK HEARTBEAT (Monitoramento de Pipeline)
+      - name: Better Stack Heartbeat
+        if: success()
+        run: curl "${{ secrets.BETTERSTACK_HEARTBEAT_BACKEND }}"
