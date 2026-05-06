@@ -186,7 +186,6 @@ docker-compose up --build
 As imagens oficiais e versionadas deste projeto estão disponíveis em:
 - **Backend:** `[SEU-USUARIO]/notagest-backend`
 - **Frontend:** `[SEU-USUARIO]/notagest-frontend`
-- **Microsserviço:** `[SEU-USUARIO]/notagest-microservice`
 
 ### 🛡️ DevSecOps
 Integração com **Sonar Cloud** configurada nos Workflows do GitHub Actions para análise de segurança e qualidade.

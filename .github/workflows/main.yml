@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - prePI
+      - main
 
 jobs:
   version:
