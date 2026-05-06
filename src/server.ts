@@ -15,7 +15,10 @@ import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import { logger } from './utils/logger.js';
 
 dotenv.config();
-connectDB();
+
+if (process.env.NODE_ENV !== 'test') {
+  connectDB();
+}
 
 const app = express();
 app.use(cors({
