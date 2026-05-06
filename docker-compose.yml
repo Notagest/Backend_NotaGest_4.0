@@ -1,5 +1,5 @@
 services:
-  # 🍃 Banco de Dados (Obrigatório pelo PDF)
+  # 🍃 Banco de Dados (Opcional se usar Atlas, mas mantido para redundância local)
   mongodb:
     image: mongo:latest
     container_name: notagest-db
@@ -19,9 +19,10 @@ services:
       - "5000:5000"
     environment:
       - PORT=5000
-      - MONGO_URI=mongodb://mongodb:27017/notagest
+      - MONGO_URI=${MONGO_URI}
       - JWT_SECRET=${JWT_SECRET}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - BETTERSTACK_TOKEN=${BETTERSTACK_TOKEN}
     depends_on:
       - mongodb
     networks:
@@ -36,8 +37,8 @@ services:
       - "4000:4000"
     environment:
       - PORT=4000
-      - NEXT_PUBLIC_AUTH_SERVICE_URL=http://localhost:5000/api/users
-      - NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
+      - NEXT_PUBLIC_AUTH_SERVICE_URL=http://notagest-backend:5000/api/users
+      - NEXT_PUBLIC_BACKEND_URL=http://notagest-backend:5000
     depends_on:
       - backend
     networks:
@@ -49,3 +50,4 @@ networks:
 
 volumes:
   mongo-data:
+

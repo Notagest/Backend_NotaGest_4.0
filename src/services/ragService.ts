@@ -15,7 +15,7 @@ const getGenAI = () => {
 export const generateEmbedding = async (text: string): Promise<number[]> => {
     try {
         const genAI = getGenAI();
-        const model = genAI.getGenerativeModel({ model: "models/gemini-embedding-2" });
+        const model = genAI.getGenerativeModel({ model: "gemini-embedding-2" });
         const result = await model.embedContent(text);
         return result.embedding.values;
     } catch (error: any) {
@@ -97,7 +97,7 @@ INSTRUÇÕES:
 5. Formate com tópicos, negritos e separe as seções claramente.`;
 
         const genAI = getGenAI();
-        const model = genAI.getGenerativeModel({ model: "models/gemini-2.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const result = await model.generateContent(prompt);
         return result.response.text();
     } catch (error: any) {

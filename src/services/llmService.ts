@@ -24,7 +24,7 @@ function fileToGenerativePart(filePath: string, mimeType: string) {
 export const extractInvoiceData = async (filePath: string, mimeType: string) => {
   try {
     const genAI = getGenAI();
-    const model = genAI.getGenerativeModel({ model: "models/gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `Analise o documento anexado (nota fiscal, cupom, recibo ou anotação).
 Retorne ESTRITAMENTE um JSON com este formato:

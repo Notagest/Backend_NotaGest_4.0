@@ -16,6 +16,12 @@ import { logger } from './utils/logger.js';
 
 dotenv.config();
 
+if (!process.env.GEMINI_API_KEY) {
+  console.warn('⚠️ AVISO: GEMINI_API_KEY não encontrada no ambiente. As funções de IA (RAG e Extração) não funcionarão.');
+} else {
+  console.log('✅ IA: Chave do Gemini configurada.');
+}
+
 if (process.env.NODE_ENV !== 'test') {
   connectDB();
 }
