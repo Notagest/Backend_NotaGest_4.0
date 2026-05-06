@@ -19,8 +19,10 @@ import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import { logger } from './utils/logger.js';
 
 // Configurando o dirname para ESModules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+if (typeof __filename === 'undefined') {
+  (global as any).__filename = fileURLToPath(import.meta.url);
+  (global as any).__dirname = path.dirname(__filename);
+}
 
 dotenv.config();
 connectDB();

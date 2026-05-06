@@ -42,6 +42,11 @@ export const createArquivo = async (req: IAuthRequest, res: Response) => {
       category, subcategory, observation, filePath 
     } = req.body;
 
+    // Validação para passar nos testes
+    if (!title || !value || !purchaseDate || !property || !category || !subcategory) {
+      return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
+    }
+
     const novoArquivo = await Arquivo.create({
       title, value, purchaseDate, property,
       category, subcategory, observation, filePath,
@@ -62,13 +67,19 @@ export const deleteArquivo = async (req: IAuthRequest, res: Response) => {
     const fileId = req.params.id;
     const userId = req.user?.id;
     const arquivo = await Arquivo.findById(fileId);
-    if (!arquivo || arquivo.user.toString() !== userId) {
+    
+    if (!arquivo) {
       return res.status(404).json({ message: 'Arquivo não encontrado' });
     }
+
+    if (arquivo.user.toString() !== userId) {
+      return res.status(401).json({ message: 'Não autorizado a excluir este arquivo.' });
+    }
+
     await arquivo.deleteOne();
-    res.status(200).json({ message: 'Removido' });
+    res.status(200).json({ id: fileId, message: 'Arquivo removido com sucesso' });
   } catch (error: any) {
-    res.status(500).json({ message: 'Erro' });
+    res.status(500).json({ message: 'Erro ao deletar arquivo' });
   }
 };
 
@@ -80,15 +91,26 @@ export const updateArquivo = async (req: IAuthRequest, res: Response) => {
     const fileId = req.params.id;
     const userId = req.user?.id;
     const { title, value } = req.body;
-    const arquivo = await Arquivo.findById(fileId);
-    if (!arquivo || arquivo.user.toString() !== userId) {
-      return res.status(404).json({ message: 'Não encontrado' });
+
+    if (!title && !value) {
+      return res.status(400).json({ message: 'Informe pelo menos um campo para atualizar' });
     }
+
+    const arquivo = await Arquivo.findById(fileId);
+    
+    if (!arquivo) {
+      return res.status(404).json({ message: 'Arquivo não encontrado' });
+    }
+
+    if (arquivo.user.toString() !== userId) {
+      return res.status(401).json({ message: 'Não autorizado.' });
+    }
+
     if (title) arquivo.title = title;
     if (value) arquivo.value = value;
     await arquivo.save();
     res.status(200).json(arquivo);
   } catch (error: any) {
-    res.status(500).json({ message: 'Erro' });
+    res.status(500).json({ message: 'Erro ao atualizar arquivo' });
   }
 };
