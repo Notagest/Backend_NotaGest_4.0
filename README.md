@@ -33,6 +33,31 @@ docker build -t backendnotagest .
 
 ```bash
 docker run -d -p 5000:5000 backendnotagest
+```
+
+---
+
+## 🛠️ Orquestração com Docker Compose
+
+Para facilitar o desenvolvimento e garantir que todos os serviços (Backend, Frontend, Microsserviço e Banco de Dados) funcionem em conjunto, utilize o Docker Compose.
+
+### 🔹 1. Subir o ecossistema completo
+
+```bash
+docker-compose up --build
+```
+
+Este comando irá:
+1. Criar e configurar o banco de dados local (**MongoDB**).
+2. Construir e subir o **Microsserviço de Autenticação**.
+3. Construir e subir o **Backend Principal**.
+4. Construir e subir o **Frontend (Interface)**.
+5. Criar uma rede isolada para comunicação segura entre os serviços.
+
+### 🔹 2. Desligar os serviços
+
+```bash
+docker-compose down
 ````
 ## 🔍 Observabilidade (Logs)
 

@@ -13,11 +13,13 @@ describe('User Controller - Unit Tests', () => {
 
   describe('getUserProfile (Unitário Fácil 1)', () => {
     it('deve retornar erro 400 se o profileId não for informado na rota', async () => {
-      // Configuramos o req.params para não conter o ID
+      // Arrange
       req.params = {};
       
+      // Act
       await getUserProfile(req, res);
       
+      // Assert
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({ message: 'ID do perfil ou usuário autenticado não encontrado.' });
     });
@@ -25,11 +27,13 @@ describe('User Controller - Unit Tests', () => {
 
   describe('createProfileInternal (Unitário Fácil 2)', () => {
     it('deve retornar erro 400 se faltar campos obrigatórios para criar o perfil', async () => {
-      // Colocamos dados incompletos no Body
+      // Arrange
       req.body = { nome: 'João Silva' }; // faltam 'email' e 'senha'
       
+      // Act
       await createProfileInternal(req, res);
 
+      // Assert
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({ message: 'Nome, email e senha são obrigatórios.' });
     });

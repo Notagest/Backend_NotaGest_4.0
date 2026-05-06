@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { IAuthRequest } from '../interfaces/IAuthRequest.js';
 import { askAssistant } from '../services/ragService.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * @function queryRAG
@@ -9,6 +10,8 @@ import { askAssistant } from '../services/ragService.js';
 export const queryRAG = async (req: IAuthRequest, res: Response) => {
     const { query } = req.body;
     const userId = req.user?.id;
+
+    logger.info('Iniciando consulta inteligente (RAG)', { userId, query });
 
     if (!userId) {
         return res.status(401).json({ message: 'Usuário não autenticado.' });
@@ -20,9 +23,15 @@ export const queryRAG = async (req: IAuthRequest, res: Response) => {
 
     try {
         const answer = await askAssistant(userId, query);
+        logger.info('Consulta inteligente respondida', { userId });
         res.status(200).json({ answer });
     } catch (error: any) {
-        console.error("ERRO queryRAG:", error.message);
+        logger.error('Erro na consulta inteligente (RAG)', {
+            message: error.message,
+            stack: error.stack,
+            userId,
+            query
+        });
         res.status(500).json({ 
             message: 'Erro ao processar consulta inteligente.', 
             error: error.message 

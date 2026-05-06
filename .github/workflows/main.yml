@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - main
+      - prePI
 
 jobs:
   version:
@@ -12,7 +12,10 @@ jobs:
 
     steps:
       - name: Checkout do código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
 
       - name: Configurar Node.js
         uses: actions/setup-node@v2
@@ -25,7 +28,7 @@ jobs:
       - name: Rodar build
         run: npm run build
 
-      # 🐳 DOCKER LOGIN & BUILD & PUSH (Novo)
+      # 🐳 DOCKER LOGIN
       - name: Login no Docker Hub
         uses: docker/login-action@v2
         with:
@@ -35,18 +38,13 @@ jobs:
       - name: Testes unitarios
         run: npm test    
 
-      # 🔍 SONAR CLOUD STEP (Novo)
+      # 🔍 SONAR CLOUD SCAN
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Checkout do código com token
-        uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          fetch-depth: 0
 
       - name: Instalar semver
         run: npm install -g semver
@@ -56,9 +54,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
           if [ -z "$(git tag)" ]; then
-            git config --global user.name 'github-actions'
-            git config --global user.email 'github-actions@github.com'
             git tag -a v0.0.0 -m "Initial release"
             git push origin v0.0.0
           fi
@@ -66,11 +64,13 @@ jobs:
       - name: Calcular nova versão
         id: version
         run: |
-          git fetch --tags
-          LAST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-          if [ -z "$LAST_TAG" ]; then
+          # Busca a última tag que segue o padrão vX.X.X
+          LAST_TAG=$(git tag -l "v*" --sort=-v:refname | head -n 1)
+          
+          if [ -z "$LAST_TAG" ] || [ "$LAST_TAG" = "v" ]; then
             LAST_TAG="v0.0.0"
           fi
+          
           echo "Versão Atual: $LAST_TAG"
           
           if [ "$LAST_TAG" = "v0.0.0" ]; then
@@ -124,10 +124,24 @@ jobs:
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
           git add package.json
-          git commit -m "chore(release): version ${{ env.new_version }}"
-          git tag v${{ env.new_version }}
-          git push origin main --tags
+          
+          # Só faz commit se houver mudanças no package.json
+          if git diff --cached --quiet; then
+            echo "Sem mudanças para commitar."
+          else
+            git commit -m "chore(release): version ${{ env.new_version }}"
+          fi
 
+          # Só cria a tag se ela não existir
+          if git rev-parse v${{ env.new_version }} >/dev/null 2>&1; then
+            echo "Tag v${{ env.new_version }} já existe."
+          else
+            git tag v${{ env.new_version }}
+          fi
+          
+          git push origin prePI --tags
+
+      # 🐳 DOCKER BUILD & PUSH
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v4
         with:
@@ -149,3 +163,8 @@ jobs:
           subject: Falha no Pipeline - ${{ github.repository }}
           to: ${{ secrets.EMAIL_DESTINO }}
           from: ${{ secrets.EMAIL_ORIGEM }}
+
+      # 💓 BETTER STACK HEARTBEAT (Monitoramento de Pipeline)
+      - name: Better Stack Heartbeat
+        if: success()
+        run: curl "${{ secrets.BETTERSTACK_HEARTBEAT_BACKEND }}"
