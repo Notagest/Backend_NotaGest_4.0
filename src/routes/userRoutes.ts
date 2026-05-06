@@ -92,6 +92,9 @@ router.get('/byEmail/:email', async (req: Request, res: Response) => {
 router.put('/change-password', protect, userController.changePassword);
 router.post('/internal', userController.createProfileInternal);
 
+router.post('/register', userController.registerUser);
+router.post('/login', userController.loginUser);
+
 router.get('/:id', protect, userController.getUserProfile);
 router.put('/:id', protect, userController.updateUserProfile);
 router.delete('/:id', protect, userController.deleteUser);

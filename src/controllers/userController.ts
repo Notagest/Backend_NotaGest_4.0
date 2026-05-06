@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import * as userService from '../services/userService.js';
 import User from '../models/userModel.js';
 import { IAuthRequest } from '../interfaces/IAuthRequest.js';
@@ -304,5 +305,75 @@ export const getUserByToken = async (req: IAuthRequest, res: Response) => {
       method: req.method
     });
     res.status(500).json({ message: 'Erro ao buscar usuário' });
+  }
+};
+
+// ==========================
+// 🔑 FUNÇÃO: GERAR TOKEN JWT
+// ==========================
+const generateToken = (email: string, id: string, nome: string) => {
+  return jwt.sign({ email, id, nome }, process.env.JWT_SECRET || 'secret', { expiresIn: '6h' });
+};
+
+// ==========================
+// 🔐 LOGIN DE USUÁRIO
+// ==========================
+export const loginUser = async (req: any, res: Response) => {
+  const { email, senha } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: 'Credenciais inválidas.' });
+
+    const isMatch = await bcrypt.compare(senha, user.senha);
+    if (!isMatch) return res.status(400).json({ message: 'Credenciais inválidas.' });
+
+    const token = generateToken(user.email, (user._id as any).toString(), user.nome);
+
+    logger.info("Login bem-sucedido", { email: user.email, userId: user._id });
+
+    res.status(200).json({
+      message: 'Login realizado com sucesso!',
+      user: { id: user._id, nome: user.nome, email: user.email },
+      token,
+    });
+  } catch (err: any) {
+    logger.error("Falha no login", { email, error: err.message });
+    res.status(500).json({ message: 'Erro no servidor.' });
+  }
+};
+
+// ==========================
+// 🧾 REGISTRO DE USUÁRIO
+// ==========================
+export const registerUser = async (req: any, res: Response) => {
+  const { nome, email, senha } = req.body;
+
+  if (!nome || !email || !senha) {
+    return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+  }
+
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'E-mail já cadastrado.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(senha, salt);
+
+    const newUser = await userService.createProfile(email, nome, hashedPassword);
+    const token = generateToken(newUser.email, (newUser._id as any).toString(), newUser.nome);
+
+    logger.info("Novo usuário registrado", { email: newUser.email, userId: newUser._id });
+
+    res.status(201).json({
+      message: 'Usuário registrado com sucesso!',
+      user: { id: newUser._id, nome: newUser.nome, email: newUser.email },
+      token,
+    });
+  } catch (err: any) {
+    logger.error("Falha no registro", { email, error: err.message });
+    res.status(500).json({ message: 'Erro no servidor.' });
   }
 };
