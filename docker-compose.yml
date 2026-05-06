@@ -1,0 +1,53 @@
+services:
+  # 🍃 Banco de Dados (Opcional se usar Atlas, mas mantido para redundância local)
+  mongodb:
+    image: mongo:latest
+    container_name: notagest-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - notagest-network
+
+  # ⚙️ Backend Monolítico (Cérebro + Autenticação)
+  backend:
+    build:
+      context: .
+    container_name: notagest-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=${MONGO_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - BETTERSTACK_TOKEN=${BETTERSTACK_TOKEN}
+    depends_on:
+      - mongodb
+    networks:
+      - notagest-network
+
+  # 💻 Frontend (Interface)
+  frontend:
+    build:
+      context: ../Frontend_NotaGest_4.0
+    container_name: notagest-frontend
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - NEXT_PUBLIC_AUTH_SERVICE_URL=http://notagest-backend:5000/api/users
+      - NEXT_PUBLIC_BACKEND_URL=http://notagest-backend:5000
+    depends_on:
+      - backend
+    networks:
+      - notagest-network
+
+networks:
+  notagest-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+

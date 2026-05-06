@@ -1,6 +1,6 @@
 {
   "name": "notagestexpress",
-  "version": "1.1.0",
+  "version": "1.4.0",
   "description": "",
   "keywords": [],
   "license": "ISC",
@@ -11,7 +11,7 @@
     "start": "node dist/server.js",
     "test": "jest",
     "build": "tsc",
-    "dev": "nodemon --exec node --loader ts-node/esm --no-warnings ./src/server.ts"
+    "dev": "nodemon --ignore uploads --ignore logs --exec node --loader ts-node/esm --no-warnings ./src/server.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
