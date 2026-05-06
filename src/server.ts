@@ -1,12 +1,8 @@
-// importação das bibliotecas
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
-
 import { fileURLToPath } from 'url';
-
-// importação dos arquivos internos
 import connectDB from './config/mongoDb.js';
 import setupSwagger from './config/swaggerConfig.js';
 import userRoutes from './routes/userRoutes.js';
@@ -17,12 +13,6 @@ import aiRoutes from './routes/aiRoutes.js';
 import { requestLogger } from "./middleware/requestLogger.js";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import { logger } from './utils/logger.js';
-
-// Configurando o dirname para ESModules
-if (typeof __filename === 'undefined') {
-  (global as any).__filename = fileURLToPath(import.meta.url);
-  (global as any).__dirname = path.dirname(__filename);
-}
 
 dotenv.config();
 connectDB();
@@ -53,8 +43,9 @@ app.use('/api/uploads', fileRoutes);
 app.use('/api/imoveis', propertyRoutes);
 app.use('/api/uploadfile', uploadFileRoutes);
 app.use('/api/ai', aiRoutes);
-// Servir arquivos da pasta uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Servir arquivos da pasta uploads usando process.cwd() para compatibilidade com Jest/ESM
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // erro global
 app.use(errorMiddleware);
@@ -68,8 +59,6 @@ app.use((req: Request, res: Response) => {
   });
   res.status(404).json({ message: "Rota não encontrada" });
 });
-
-
 
 const PORT = process.env.PORT || 5000;
 if (process.env.NODE_ENV !== 'test') {
