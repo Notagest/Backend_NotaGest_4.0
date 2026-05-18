@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - prePI
+      - main
 
 jobs:
   version:
@@ -139,7 +139,7 @@ jobs:
             git tag v${{ env.new_version }}
           fi
           
-          git push origin prePI --tags
+          git push origin main --tags
 
       # 🐳 DOCKER BUILD & PUSH
       - name: Build and Push Docker Image

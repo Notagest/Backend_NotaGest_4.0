@@ -4,7 +4,6 @@ node_modules/
 # Uploads e Dados Sensíveis (Crítico para o NotaGest)
 uploads/
 .env
-.env.*
 
 # Saída de Compilação
 dist/
@@ -31,3 +30,5 @@ tests/
 __tests__/
 *.test.ts
 *.spec.ts
+
+# teste betterstack
