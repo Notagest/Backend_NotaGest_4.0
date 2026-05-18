@@ -33,7 +33,11 @@ const arquivoSchema = new Schema<IFile>({
     required: [true, 'A subcategoria é obrigatória'] 
   },
   observation: { type: String },
-  filePath: { type: String }
+  filePath: { type: String },
+  embeddings: { 
+    type: [Number], 
+    default: [] 
+  }
 }, { 
   timestamps: true 
 });

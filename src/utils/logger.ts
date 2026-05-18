@@ -12,6 +12,9 @@ export const sendLog = async (
   message: string,
   data: LogData = {}
 ): Promise<void> => {
+  if (!process.env.BETTERSTACK_TOKEN) {
+    return;
+  }
   try {
 
     const log = [

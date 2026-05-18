@@ -1,11 +1,8 @@
-// importação das bibliotecas
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-// importação dos arquivos internos
 import connectDB from './config/mongoDb.js';
 import setupSwagger from './config/swaggerConfig.js';
 import userRoutes from './routes/userRoutes.js';
@@ -17,17 +14,24 @@ import { requestLogger } from "./middleware/requestLogger.js";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import { logger } from './utils/logger.js';
 
-// Configurando o dirname para ESModules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 dotenv.config();
-connectDB();
+
+if (!process.env.GEMINI_API_KEY) {
+  console.warn('⚠️ AVISO: GEMINI_API_KEY não encontrada no ambiente. As funções de IA (RAG e Extração) não funcionarão.');
+} else {
+  console.log('✅ IA: Chave do Gemini configurada.');
+}
+
+if (process.env.NODE_ENV !== 'test') {
+  connectDB();
+}
 
 const app = express();
 app.use(cors({
   origin: [
     'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:4000',
     'https://nota-gest.vercel.app'
   ],
   methods: ['GET','POST','PUT','DELETE'],
@@ -48,8 +52,9 @@ app.use('/api/uploads', fileRoutes);
 app.use('/api/imoveis', propertyRoutes);
 app.use('/api/uploadfile', uploadFileRoutes);
 app.use('/api/ai', aiRoutes);
-// Servir arquivos da pasta uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Servir arquivos da pasta uploads usando process.cwd() para compatibilidade com Jest/ESM
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // erro global
 app.use(errorMiddleware);
@@ -63,8 +68,6 @@ app.use((req: Request, res: Response) => {
   });
   res.status(404).json({ message: "Rota não encontrada" });
 });
-
-
 
 const PORT = process.env.PORT || 5000;
 if (process.env.NODE_ENV !== 'test') {
