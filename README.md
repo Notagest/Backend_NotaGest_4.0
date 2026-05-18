@@ -168,3 +168,25 @@ Qualquer requisição acima de 1 (segundo) já dispara alerta
 - Bianca Benatti
 - José Paulo
 - Rodolfo Antunes
+
+---
+
+## 🚀 Entrega 3 - Orquestração e CI/CD
+
+### 🐳 Docker Compose (Rodar Projeto Completo)
+Este repositório contém o arquivo `docker-compose.yml` que orquestra todo o ecossistema NotaGest (Frontend, Backend, Microsserviço e Banco de Dados).
+
+Para rodar tudo localmente, certifique-se de que as pastas `Frontend_NotaGest_4.0` e `Microsservico_NotaGest_4.0` estão no mesmo nível de diretório que esta pasta e execute:
+
+```bash
+docker-compose up --build
+```
+
+### 📦 Imagens no Docker Hub
+As imagens oficiais e versionadas deste projeto estão disponíveis em:
+- **Backend:** `[SEU-USUARIO]/notagest-backend`
+- **Frontend:** `[SEU-USUARIO]/notagest-frontend`
+- **Microsserviço:** `[SEU-USUARIO]/notagest-microservice`
+
+### 🛡️ DevSecOps
+Integração com **Sonar Cloud** configurada nos Workflows do GitHub Actions para análise de segurança e qualidade.
